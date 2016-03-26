@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd"
+	default-lazy-init="true">
+	<description>spring公共配置</description>
+
+	<context:annotation-config /><!-- 隐式的向spring中注册 -->
+
+	<!-- 自动扫描包，其中不包括Controller,Controller -->
+	<context:component-scan base-package="com.exam.mserver">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<!-- 读取jdbc.properties配置文件 -->
+	<context:property-placeholder location="classpath:application.properties" />
+	<!-- mybatis配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:/mybatis/*.xml" />
+		<property name="typeAliasesPackage" value="com.exam.mserver.entity" />
+	</bean>
+	<!-- 扫描basePackage下所有以@MyBatisRepository注解的接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 如果使 用了一个 以上的 DataSource ,那 么自动 装配可 能会失效 。使用 sqlSessionFactoryBeanName来设置正确的 
+			bean名 称。 -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		<property name="basePackage" value="com.exam.mserver" />
+		<!-- 缩小搜索范围，只搜索带有MyBatisRepository注解的类 -->
+		<property name="annotationClass"
+			value="com.exam.mserver.persistence.annotation.MyBatisRepostory" />
+	</bean>
+	<!-- 数据源配置 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.exam.mserver</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 数据库映射 -->
+	<!-- destroy-method="close"的作用是当数据库连接不使用的时候,就把该连接重新放到数据池中,方便下次使用调用.  -->
+	<bean id="dataSource"
+		class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<property name="maxIdle" value="${jdbc.maxIdle}" /><!-- 最大连接数 -->
+		<property name="minIdle" value="${jdbc.minIdle}" /><!-- 最小连接数 -->
+		<property name="maxActive" value="${jdbc.maxActive}" /><!-- 最大活动连接数 -->
+		<property name="maxWait" value="${jdbc.maxWait}" /><!-- 最大等待时间 -->
+		<property name="initialSize" value="${jdbc.initialSize}" /><!-- 
+			初始化连接数 -->
+
+		<!-- (boolean) 标记是否删除泄露的连接， 如果他们超过了removeAbandonedTimout 的限制。 如果设置为true， 
+			连接被认为是被泄露并且可以被删除， 如果空闲时间超过removeAbandonedTimeout。 设置为true 可以为写法糟糕的没有关闭连接的程序修复数据库连接。 
+			参考logAbandoned -->
+		<property name="removeAbandoned" value="${jdbc.removeAbandoned}" />
+		<!-- (int) 泄露的连接可以被删除的超时值， 单位秒应设置为应用中查询执行最长的时间 -->
+		<property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}" />
+
+		<!-- 连接返回给调用者之前验证连接是否有效 -->
+		<property name="validationQuery" value="select 1" />
+		<!-- (long) 避免过度验证，保证验证不超过这个频率——以毫秒为单位。如果一个连接应该被验证， 但上次验证未达到指定间隔，将不再次验证。 
+			30000（30秒） -->
+		<property name="validationInterval" value="${jdbc.validationInterval}" />
+		<!-- 是否自动提交 -->
+		<property name="defaultAutoCommit" value="${jdbc.defaulrAutoCommit}" />
+		<!-- 验证失败时，是否将连接从池中丢弃 -->
+		<property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+		<!-- 在return给pool时，是否提前进行validate操作 -->
+		<property name="testOnReturn" value="${jdbc.testOnReturn}"/>
+		<!-- 在borrow一个pool实例时，是否提前进行validate操作-->
+		<property name="testOnBorrow" value="${jdbc.testOnBorrow}"/>
+		<!-- 把空闲时间超过minEvictableIdleTimeMillis毫秒的连接断开, 直到连接池中的连接数到minIdle为止(毫秒，30分钟) -->
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+		<!-- 连接池中连接可空闲的时间（毫秒，5分钟） -->
+		<property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}"/>
+		 <!-- 在每次空闲连接回收器线程(如果有)运行时检查的连接数量 -->
+		<property name="numTestsPerEvictionRun" value="${jdbc.numTestsPerEvictionRun}"/>
+	</bean>
+
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager"
+		proxy-target-class="true" />
+
+	<!-- proxy-target-class属性，默认为false，表示使用jdk动态代理织入增强，当配为<aop:aspectj-autoproxy 
+		poxy-target-class="true"/>时，表示使用CGLib动态代理技术织入增强。不过即使proxy-target-class设置为false，如果目标类没有声明接口，则spring将自动使用CGLib动态代理。 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+</beans>
