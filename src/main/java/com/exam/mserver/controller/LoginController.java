@@ -45,12 +45,16 @@ public class LoginController {
 			 return "/sys/success";
 		}
 		else{
-			List<User> list = userMyBatis.findAll();
-			System.out.println("list个个数是："+list.size());
-			if(null != list && list.size() >0){
-				User user1 = list.get(0);
-				System.out.println("用户的姓名："+user1.getUserName());
-			}
+			//List<User> list = thisService.findAll();
+			User user = thisService.get("050b5c1ff55d468d8f135081631e2b7d");
+			System.out.println("user："+user.getUserName() +" user age:"+user.getAge());
+			
+			User user1 = thisService.get("050b5c1ff55d468d8f135081631e2b7d");
+			System.out.println("user1："+user1.getUserName() +" user1 age:"+user1.getAge());
+//			if(null != list && list.size() >0){
+//				User user1 = list.get(0);
+//				System.out.println("用户的姓名："+user1.getUserName());
+//			}
 			return "/sys/login";
 		}
 			

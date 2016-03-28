@@ -7,5 +7,5 @@ import com.exam.mserver.entity.User;
 @Repository
 public class UserDao extends BaseDao<User>{
 
-	
+	 
 }
