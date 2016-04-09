@@ -30,6 +30,8 @@ public class User extends IdEntity<User>{
 	
 	private Integer age;
 	
+	private String password;
+	
 	 
 	
 	public User() {
@@ -54,6 +56,15 @@ public class User extends IdEntity<User>{
 
 	public void setAge(Integer age) {
 		this.age = age;
+	}
+	
+	@Column(name="password")
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 	

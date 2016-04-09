@@ -130,4 +130,15 @@
 	<!-- proxy-target-class属性，默认为false，表示使用jdk动态代理织入增强，当配为<aop:aspectj-autoproxy 
 		poxy-target-class="true"/>时，表示使用CGLib动态代理技术织入增强。不过即使proxy-target-class设置为false，如果目标类没有声明接口，则spring将自动使用CGLib动态代理。 -->
 	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<import resource="classpath*:shiro/shiro.xml"/>
+	
+	<!-- i18n国际化 -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<!-- 国际化信息所在的文件名，messages是properties文件的通用名，如messages_en_US.properties -->
+		<property name="basename" value="classpath:i18n/messages" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<!-- 如果在国际化资源文件中找不到对应key的信息，就用这个key作为名称 -->
+		<property name="useCodeAsDefaultMessage" value="true" />
+	</bean>
 </beans>
